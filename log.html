@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级训练记录系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        label {
+            margin: 10px 0 5px;
+            display: block;
+        }
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>高级训练记录系统</h1>
+        <h2>训练记录</h2>
+        <form id="training-form">
+            <!-- Basic Training Details -->
+            <label for="exercise-date">日期:</label>
+            <input type="date" id="exercise-date" name="exercise-date" required>
+
+            <label for="exercise-type">训练类型:</label>
+            <select id="exercise-type" name="exercise-type">
+                <option value="chest">胸部训练</option>
+                <option value="back">背部训练</option>
+                <option value="legs">腿部训练</option>
+                <option value="cardio">有氧训练</option>
+            </select>
+
+            <label for="exercise-name">动作名称:</label>
+            <input type="text" id="exercise-name" name="exercise-name" required>
+
+            <label for="weight">重量 (kg):</label>
+            <input type="number" id="weight" name="weight" min="0" required>
+
+            <label for="reps">次数:</label>
+            <input type="number" id="reps" name="reps" min="0" required>
+
+            <label for="sets">组数:</label>
+            <input type="number" id="sets" name="sets" min="1" required>
+
+            <label for="rpe">RPE (感知努力等级):</label>
+            <input type="number" id="rpe" name="rpe" min="1" max="10" required>
+
+            <!-- Advanced Monitoring -->
+            <label for="heart-rate">训练中心率 (bpm):</label>
+            <input type="number" id="heart-rate" name="heart-rate" min="0">
+
+            <label for="sleep-hours">前一晚睡眠时间 (小时):</label>
+            <input type="number" id="sleep-hours" name="sleep-hours" min="0" step="0.1">
+
+            <label for="calories-intake">当天摄入卡路里 (kcal):</label>
+            <input type="number" id="calories-intake" name="calories-intake" min="0">
+
+            <label for="recovery-status">恢复状态:</label>
+            <select id="recovery-status" name="recovery-status">
+                <option value="excellent">极佳</option>
+                <option value="good">良好</option>
+                <option value="average">一般</option>
+                <option value="poor">较差</option>
+                <option value="very poor">非常差</option>
+            </select>
+
+            <button type="button" onclick="addTrainingRecord()">添加训练记录</button>
+        </form>
+
+        <table id="record-table">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>训练类型</th>
+                    <th>动作名称</th>
+                    <th>重量</th>
+                    <th>次数</th>
+                    <th>组数</th>
+                    <th>RPE</th>
+                    <th>估计1RM</th>
+                    <th>心率</th>
+                    <th>睡眠时间</th>
+                    <th>卡路里摄入</th>
+                    <th>恢复状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 训练记录将在这里显示 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function addTrainingRecord() {
+            const form = document.getElementById('training-form');
+            const date = form['exercise-date'].value;
+            const type = form['exercise-type'].value;
+            const name = form['exercise-name'].value;
+            const weight = parseInt(form['weight'].value, 10);
+            const reps = parseInt(form['reps'].value, 10);
+            const sets = parseInt(form['sets'].value, 10);
+            const rpe = parseInt(form['rpe'].value, 10);
+            const heartRate = parseInt(form['heart-rate'].value, 10);
+            const sleepHours = parseFloat(form['sleep-hours'].value);
+            const caloriesIntake = parseInt(form['calories-intake'].value, 10);
+            const recoveryStatus = form['recovery-status'].value;
+
+            // 简单的1RM计算公式：重量 * (1 + (次数 / 30))
+            const estimated1RM = weight * (1 + (reps / 30));
+            const table = document.getElementById('record-table').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td>${date}</td>
+                <td>${type}</td>
+                <td>${name}</td>
+                <td>${weight} kg</td>
+                <td>${reps}</td>
+                <td>${sets}</td>
+                <td>${rpe}</td>
+                <td>${estimated1RM.toFixed(2)} kg</td>
+                <td>${heartRate} bpm</td>
+                <td>${sleepHours} h</td>
+                <td>${caloriesIntake} kcal</td>
+                <td>${recoveryStatus}</td>
+                <td><span class="delete-btn" onclick="deleteRecord(this)">删除</span></td>
+            `;
+
+            sortTableByDate();
+        }
+
+        function deleteRecord(element) {
+            const row = element.parentElement.parentElement;
+            document.getElementById('record-table').deleteRow(row.rowIndex);
+        }
+
+        function sortTableByDate() {
+            let table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("record-table");
+            switching = true;
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[0];
+                    y = rows[i + 1].getElementsByTagName("TD")[0];
+                    if (new Date(x.innerHTML) > new Date(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
